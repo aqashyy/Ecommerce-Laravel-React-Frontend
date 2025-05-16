@@ -30,8 +30,8 @@ const Product = () => {
                     <div className="col-md-12">
                         <nav aria-label="breadcrumb">
                             <ol className="breadcrumb">
-                                <li className="breadcrumb-item active" aria-current="page"><Link to="/">Home</Link></li>
-                                <li className="breadcrumb-item active" aria-current="page"><Link to="/shop">Shop</Link></li>
+                                <li className="breadcrumb-item" aria-current="page"><Link to="/">Home</Link></li>
+                                <li className="breadcrumb-item" aria-current="page"><Link to="/shop">Shop</Link></li>
                                 <li className="breadcrumb-item active" aria-current="page">Dummy product title</li>
                             </ol>
                         </nav>
