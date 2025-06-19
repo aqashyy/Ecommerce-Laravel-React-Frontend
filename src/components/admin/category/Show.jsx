@@ -43,7 +43,7 @@ function Show() {
                 <div className="row">
                     <div className="d-flex justify-content-between mt-5 pd-3">
                         <h3>Categories</h3>
-                        <Link to="" className='btn btn-primary mb-2'>Create</Link>
+                        <Link to="/admin/categories/create" className='btn btn-primary mb-2'>Create</Link>
                     </div>
                     <div className="col-md-3">
                         <Sidebar />
@@ -60,7 +60,7 @@ function Show() {
                                 }
                                 {
                                     categories && categories.length > 0 &&
-                                    
+
                                     <table className="table table-hover">
                                         <thead>
                                             <tr>
