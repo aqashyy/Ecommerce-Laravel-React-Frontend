@@ -26,7 +26,7 @@ const Show = () => {
 
                 if (result.status == 200) {
                     setProducts(result.data);
-                    console.log(result.data);
+                    // console.log(result.data);
                 } else {
                     console.log("something went wrong...");
                 }
@@ -77,7 +77,7 @@ const Show = () => {
                                             {
                                                 products && products.map((product, index) => {
                                                     return (
-                                                        <tr>
+                                                        <tr key={`product-${product.id}`}>
                                                             <td width={50}>{product.id}</td>
                                                             <td>
                                                                 <img className='rounded' src={product.image_url} alt="" width={50} />
