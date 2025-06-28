@@ -6,15 +6,20 @@ import { useForm } from 'react-hook-form';
 import { adminToken, apiUrl } from '../../common/http';
 import { toast } from 'react-toastify';
 import JoditEditor from 'jodit-react';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 const Create = ({ placeholder }) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const { register, handleSubmit, setError, watch, formState: { errors }, } = useForm();
+  const { register, handleSubmit, setError, clearErrors, watch, formState: { errors }, } = useForm();
   const [disable, setDisable] = useState(false);
   const navigate = useNavigate();
   const editor = useRef(null);
   const [content, setContent] = useState('');
+  const [fileSuccessMsg, setfileSuccessMsg] = useState("");
+  const [progressBarStatus, setProgressBarStatus] = useState({ status: false, type: '', percentage: 0 });
+  const [gallery, setGallery] = useState([]);
+  const [galleryImages, setGalleryImage] = useState([]);
 
   const config = useMemo(() => ({
     readonly: false, // all options from https://xdsoft.net/jodit/docs/,
@@ -24,7 +29,7 @@ const Create = ({ placeholder }) => {
   );
 
   const saveProduct = async (data) => {
-    const formData = { ...data, "description": content }
+    const formData = { ...data, "description": content, "gallery": gallery }
     // console.log(formData);
     // return ;
     setDisable(true);
@@ -56,6 +61,107 @@ const Create = ({ placeholder }) => {
 
   }
 
+  // Handling when select product image
+  const handleFile = async (e) => {
+    // return ;
+    const formData = new FormData();
+    const file = e.target.files[0];
+    formData.append("image", file);
+    // Disable create button
+    setDisable(true);
+    // set progress bar
+    setProgressBarStatus({ status: true, type: 'success', percentage: 10 });
+    // POST IMAGE TO API
+    const res = await fetch(`${apiUrl}/temp-image`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${adminToken()}`
+      },
+      body: formData
+    }).then(res => res.json())
+      .then(result => {
+        // undisable create button
+        setDisable(false);
+        // set progress bar
+        setProgressBarStatus({ status: true, type: 'success', percentage: 75 });
+        // RESPONSE STATUS CHECKING
+        if (result.status == 200) {
+          // set input value as empty
+          e.target.value = ''
+          // clear exist field error
+          clearErrors('image');
+          // set progress bar
+          setProgressBarStatus({ status: true, type: 'success', percentage: 100 });
+          // set success message
+          setfileSuccessMsg('Image Uploaded');
+          // set timeout for hide progress bar and msg
+          setTimeout(() => {
+            setProgressBarStatus({ status: false, type: '', percentage: 0 });
+            setfileSuccessMsg('');
+          }, 4000);
+          // uploaded images urls push to galleryImages from response
+          setGalleryImage([
+            ...galleryImages,
+            { id: result.data.id, img_url: result.data.image_url }
+          ]);
+          // console.log(galleryImages);
+          // push uploaded images ids to gallery
+          setGallery([
+            ...gallery,
+            result.data.id
+          ]);
+
+        } else if (result.status == 400) {
+          // set input value as empty
+          e.target.value = ''
+          // set progress bar
+          setProgressBarStatus(prev => ({ ...prev, type: 'danger', percentage: 100 }));
+          // set timeout for hide bar
+          setTimeout(() => {
+            setProgressBarStatus({ status: false, type: '', percentage: 0 });
+          }, 3000)
+          // set error
+          const FormErrors = result.errors;
+
+          Object.keys(FormErrors).forEach((field) => {
+            setError(field, { message: FormErrors[field][0] });
+          });
+        } else {
+          toast.error("Something went wrong...");
+        }
+      });
+
+  }
+  // Action when click image delete icon 
+  const deleteImg = async (imgId) => {
+    // confirmation for delete
+    if (confirm("Are you sure want to remove.?")) {
+      // disable buttons
+      setDisable(true);
+      await fetch(`${apiUrl}/temp-image/${imgId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${adminToken()}`
+        },
+      }).then((res) => res.json())
+        .then(result => {
+          // unset that image from galleryImage state
+          setGalleryImage(
+            galleryImages.filter(img => img.id != imgId)
+          );
+          // unset image from gallery state
+          setGallery(
+            gallery.filter(img => img != imgId)
+          );
+          toast.success('Image removed');
+          setDisable(false);
+        });
+
+    }
+  }
   // fetching categories
   const fetchCategories = async () => {
     const res = await fetch(`${apiUrl}/categories`, {
@@ -323,9 +429,40 @@ const Create = ({ placeholder }) => {
                       <label htmlFor="" className="form-label">Image</label>
                       <input
                         type="file"
-                        className="form-control"
+                        className={`form-control ${errors.image ? 'is-invalid' : (fileSuccessMsg ? 'is-valid' : '')}`}
                         placeholder='Qty'
+                        onChange={handleFile}
                       />
+                      {
+                        progressBarStatus.status == true &&
+                        <ProgressBar className='mt-2' animated variant={progressBarStatus.type} now={progressBarStatus.percentage} />
+                      }
+
+                      {
+                        errors.image && <p className='invalid-feedback'>{errors.image?.message}</p> ||
+                        fileSuccessMsg && <p className='text-success'>{fileSuccessMsg}</p>
+                      }
+                    </div>
+                    <div className="row">
+                      {
+                        galleryImages && galleryImages.map((img, index) => {
+
+                          return (
+                            <div className="col-md-3" key={`image-${index}`}>
+                              <div className="card shadow">
+                                <img src={img.img_url} alt="" className='w-100 rounded' />
+                                <button
+                                  type='button'
+                                  className={disable ? 'spinner-border' : 'remove-image'}
+                                  disabled={disable}
+                                  onClick={() => deleteImg(img.id)}
+                                >{disable ? '' : String.fromCharCode(215)}</button>
+                              </div>
+                            </div>
+                          )
+
+                        })
+                      }
                     </div>
                   </div>
                 </div>

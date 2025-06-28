@@ -80,7 +80,7 @@ const Show = () => {
                                                         <tr key={`product-${product.id}`}>
                                                             <td width={50}>{product.id}</td>
                                                             <td>
-                                                                <img className='rounded' src={product.image_url} alt="" width={50} />
+                                                                <img className='rounded' src={product.image_url == '' ? 'https://placehold.co/400' : product.image_url} alt="" width={50} />
                                                             </td>
                                                             <td>{product.title}</td>
                                                             <td><span>$</span>{product.price}</td>
