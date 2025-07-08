@@ -453,7 +453,7 @@ const Create = ({ placeholder }) => {
                                 <img src={img.img_url} alt="" className='w-100 rounded' />
                                 <button
                                   type='button'
-                                  className={disable ? 'spinner-border' : 'remove-image'}
+                                  className={disable ? 'spinner-border-custom spinner-border' : 'remove-image'}
                                   disabled={disable}
                                   onClick={() => deleteImg(img.id)}
                                 >{disable ? '' : String.fromCharCode(215)}</button>
