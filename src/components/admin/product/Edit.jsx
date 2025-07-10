@@ -90,6 +90,134 @@ const Edit = ({ placeholder }) => {
       });
 
   }
+  // Handling when select product image
+    const handleFile = async (e) => {
+      // return ;
+      const formData = new FormData();
+      const file = e.target.files[0];
+      formData.append("image", file);
+      formData.append("product_id", params.id);
+      // Disable create button
+      setDisable(true);
+      // set progress bar
+      setProgressBarStatus({ status: true, type: 'success', percentage: 10 });
+      // POST IMAGE TO API
+      const res = await fetch(`${apiUrl}/save-product-image`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${adminToken()}`
+        },
+        body: formData
+      }).then(res => res.json())
+        .then(result => {
+          // undisable create button
+          setDisable(false);
+          // set progress bar
+          setProgressBarStatus({ status: true, type: 'success', percentage: 75 });
+          // RESPONSE STATUS CHECKING
+          if (result.status == 200) {
+            // set input value as empty
+            e.target.value = ''
+            // clear exist field error
+            clearErrors('image');
+            // set progress bar
+            setProgressBarStatus({ status: true, type: 'success', percentage: 100 });
+            // set success message
+            setfileSuccessMsg('Image Uploaded');
+            // set timeout for hide progress bar and msg
+            setTimeout(() => {
+              setProgressBarStatus({ status: false, type: '', percentage: 0 });
+              setfileSuccessMsg('');
+            }, 4000);
+            // uploaded images urls push to galleryImages from response
+            setProductImages([
+              ...productImages,
+              { id: result.data.id, image_url: result.data.image_url }
+            ]);
+            // console.log(galleryImages);
+  
+          } else if (result.status == 400) {
+            // set input value as empty
+            e.target.value = ''
+            // set progress bar
+            setProgressBarStatus(prev => ({ ...prev, type: 'danger', percentage: 100 }));
+            // set timeout for hide bar
+            setTimeout(() => {
+              setProgressBarStatus({ status: false, type: '', percentage: 0 });
+            }, 3000)
+            // set error
+            const FormErrors = result.errors;
+  
+            Object.keys(FormErrors).forEach((field) => {
+              setError(field, { message: FormErrors[field][0] });
+            });
+          } else {
+            // set input value as empty
+            e.target.value = ''
+            // set progress bar
+            setProgressBarStatus(prev => ({ ...prev, type: 'danger', percentage: 100 }));
+            // set timeout for hide bar
+            setTimeout(() => {
+              setProgressBarStatus({ status: false, type: '', percentage: 0 });
+            }, 3000);
+
+            toast.error("Something went wrong...");
+          }
+        });
+  
+    }
+    // set image as product default image
+    const setImageAsDefault = async (imageName) => {
+        const res = await fetch(`${apiUrl}/set-default-product-image?product_id=${params.id}&image=${imageName}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${adminToken()}`
+            }
+            }).then(res => res.json())
+            .then(result => {
+                if(result.status == 200){
+                    // updating new default product image with exist product image state 
+                    setProductImages(
+                        productImages.map(img => ({
+                            ...img,
+                            is_default_img: img.image === imageName
+                        }))
+                    );
+                    toast.success(result.message);
+                    
+                } else {
+                console.log("something went wrong...");
+                }
+            });
+    }
+    // Action when click image delete icon 
+    const deleteImg = async (imgId) => {
+    // confirmation for delete
+    if (confirm("Are you sure want to delete.?")) {
+        // disable buttons
+        setDisable(true);
+        await fetch(`${apiUrl}/product-image/${imgId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${adminToken()}`
+        },
+        }).then((res) => res.json())
+        .then(result => {
+            // unset that image from productImages state
+            setProductImages(
+                productImages.filter((img) => img.id != imgId)
+            )
+            toast.success(result.message);
+            setDisable(false);
+        });
+
+    }
+    }
   // fetching categories
   const fetchCategories = async () => {
     const res = await fetch(`${apiUrl}/categories`, {
@@ -359,7 +487,7 @@ const Edit = ({ placeholder }) => {
                         type="file"
                         className={`form-control ${errors.image ? 'is-invalid' : (fileSuccessMsg ? 'is-valid' : '')}`}
                         placeholder='Qty'
-                      // onChange={handleFile}
+                        onChange={handleFile}
                       />
                       {
                         progressBarStatus.status == true &&
@@ -378,13 +506,30 @@ const Edit = ({ placeholder }) => {
                           return (
                             <div className="col-md-3" key={`image-${index}`}>
                               <div className="card shadow">
+                                
+                                {
+                                    productImg.is_default_img && 
+                                    <div class="default-badge">
+                                        <i class="fa fa-crown me-1"></i>Default
+                                    </div>
+                                }
                                 <img src={productImg.image_url} alt="" className='w-100 rounded' />
                                 <button
                                   type='button'
                                   className={disable ? 'spinner-border-custom spinner-border' : 'remove-image'}
-                                  disabled={disable}
-                                  onClick={() => deleteImg(img.id)}
+                                  disabled={disable || productImg.is_default_img}
+                                  onClick={() => deleteImg(productImg.id)}
                                 >{disable ? '' : String.fromCharCode(215)}</button>
+                                <button 
+                                class="btn mt-2 set-default-btn w-100"
+                                disabled={productImg.is_default_img}
+                                type='button'
+                                onClick={() => setImageAsDefault(productImg.image)}>
+                                    <i class="fas fa-star me-2"></i>
+                                    {
+                                        productImg.is_default_img == true ? 'Current Default' : 'Set as Default'
+                                    }
+                                </button>
                               </div>
                             </div>
                           )

@@ -204,45 +204,93 @@ footer{
     }
 }
 .remove-image {
-display: inline;
-position: absolute;
-cursor: pointer;
-top: -10px;
-right: -10px;
-border-radius: 10em;
-padding: 2px 6px 3px;
-text-decoration: none;
-font: 700 21px/20px sans-serif;
-background: #555;
-border: 3px solid #fff;
-color: #FFF;
-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  -webkit-transition: background 0.5s;
-  transition: background 0.5s;
+    display: inline;
+    position: absolute;
+    cursor: pointer;
+    top: -10px;
+    right: -10px;
+    border-radius: 10em;
+    padding: 2px 6px 3px;
+    text-decoration: none;
+    font: 700 21px/20px sans-serif;
+    background: #555;
+    border: 3px solid #fff;
+    color: #FFF;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    -webkit-transition: background 0.5s;
+    transition: background 0.5s;
+
+    &:hover {
+        background: #E54E4E;
+        padding: 3px 7px 5px;
+        top: -11px;
+        right: -11px;
+    }
+    &:active {
+        background: #E54E4E;
+        top: -10px;
+        right: -11px;
+    }
 }
 .spinner-border-custom {
-position: absolute;
-top: -10px;
-right: -10px;
-border-radius: 10em;
-padding: 2px 6px 3px;
-text-decoration: none;
-font: 700 21px/20px sans-serif;
-background: #555;
-// box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  -webkit-transition: background 0.5s;
-  transition: background 0.5s;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    border-radius: 10em;
+    padding: 2px 6px 3px;
+    text-decoration: none;
+    font: 700 21px/20px sans-serif;
+    background: #555;
+    // box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    -webkit-transition: background 0.5s;
+    transition: background 0.5s;
 }
-.remove-image:hover {
- background: #E54E4E;
-  padding: 3px 7px 5px;
-  top: -11px;
-right: -11px;
+.set-default-btn {
+    // background: linear-gradient(45deg, #667eea, #764ba2);
+    background: $tertiary-color;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        background: $primary-color;
+
+        &::before {
+            left: 100%;
+        }
+    }
+    &::focus {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    &:disabled {
+        background: $tertiary-color;
+        color: white;
+    }
 }
-.remove-image:active {
- background: #E54E4E;
-  top: -10px;
-right: -11px;
+.default-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+    animation: badgepulse 2s infinite;
+    @keyframes badgepulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
 }
