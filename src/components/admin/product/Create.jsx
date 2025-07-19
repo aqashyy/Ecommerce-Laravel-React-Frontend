@@ -20,6 +20,7 @@ const Create = ({ placeholder }) => {
   const [progressBarStatus, setProgressBarStatus] = useState({ status: false, type: '', percentage: 0 });
   const [gallery, setGallery] = useState([]);
   const [galleryImages, setGalleryImage] = useState([]);
+  const [sizes, setSizes] = useState([]);
 
   const config = useMemo(() => ({
     readonly: false, // all options from https://xdsoft.net/jodit/docs/,
@@ -200,10 +201,29 @@ const Create = ({ placeholder }) => {
         }
       });
   }
+  // fetch sizes
+      const fetchSizes = async () => {
+      const res = await fetch(`${apiUrl}/sizes`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${adminToken()}`
+        }
+      }).then(res => res.json())
+        .then(result => {
+          if (result.status == 200) {
+            setSizes(result.data);
+          } else {
+            console.log("something went wrong...");
+          }
+        });
+    }
 
   useEffect(() => {
     fetchCategories();
     fetchBrands();
+    fetchSizes();
   }, [])
   return (
     <Layout>
@@ -422,6 +442,26 @@ const Create = ({ placeholder }) => {
                       {
                         errors.is_featured && <p className='invalid-feedback'>{errors.is_featured?.message}</p>
                       }
+                    </div>
+                    <h3 className='py-3 border-bottom mt-3'>Sizes</h3>
+                    <div className="mb-3">
+                      {
+                        sizes && sizes.map(size => {
+                            return (
+                                    <div className="form-check-inline ps-2" key={`psize-${size.id}`}>
+                                        <input
+                                        {
+                                            ...register('sizes')
+                                        }
+                                         className="form-check-input" type="checkbox" value={size.id} id={`size-${size.id}`} />
+                                        <label className="form-check-label ps-2" htmlFor={`size-${size.id}`}>
+                                            {size.name}
+                                        </label>
+                                    </div>
+                            )
+                        })
+                      }
+                      
                     </div>
                     {/* Image gallery section */}
                     <h3 className='py-3 border-bottom mt-3'>Gallery</h3>
