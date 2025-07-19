@@ -11,7 +11,23 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 const Edit = ({ placeholder }) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [sizes, setSizes] = useState([]);
+  const [sizesChecked, setSizesChecked] = useState([]);
   const params = useParams();
+  const [disable, setDisable] = useState(false);
+  const navigate = useNavigate();
+  const editor = useRef(null);
+  const [content, setContent] = useState('');
+  const [fileSuccessMsg, setfileSuccessMsg] = useState("");
+  const [progressBarStatus, setProgressBarStatus] = useState({ status: false, type: '', percentage: 0 });
+  const [productImages, setProductImages] = useState([]);
+
+  const config = useMemo(() => ({
+    readonly: false, // all options from https://xdsoft.net/jodit/docs/,
+    placeholder: placeholder || 'Description here...'
+  }),
+    [placeholder]
+  );
   const { register, handleSubmit, setError, reset, clearErrors, watch, formState: { errors }, } = useForm({
     defaultValues: async () => {
       const res = await fetch(`${apiUrl}/products/${params.id}`, {
@@ -24,6 +40,7 @@ const Edit = ({ placeholder }) => {
       }).then(res => res.json())
         .then(result => {
           setProductImages(result.data.product_images);
+          setSizesChecked(result.productSizes);
           reset({
             title: result.data.title,
             category_id	: result.data.category_id,
@@ -41,30 +58,14 @@ const Edit = ({ placeholder }) => {
         })
     }
   });
-  const [disable, setDisable] = useState(false);
-  const navigate = useNavigate();
-  const editor = useRef(null);
-  const [content, setContent] = useState('');
-  const [fileSuccessMsg, setfileSuccessMsg] = useState("");
-  const [progressBarStatus, setProgressBarStatus] = useState({ status: false, type: '', percentage: 0 });
-  // const [gallery, setGallery] = useState([]);
-  // const [galleryImages, setGalleryImage] = useState([]);
-  const [productImages, setProductImages] = useState([]);
-
-  const config = useMemo(() => ({
-    readonly: false, // all options from https://xdsoft.net/jodit/docs/,
-    placeholder: placeholder || 'Description here...'
-  }),
-    [placeholder]
-  );
 
   const saveProduct = async (data) => {
-    const formData = { ...data, "description": content, "gallery": gallery }
+    const formData = { ...data, "description": content,}
     // console.log(formData);
     // return ;
     setDisable(true);
-    const res = await fetch(`${apiUrl}/products`, {
-      method: 'POST',
+    const res = await fetch(`${apiUrl}/products/${params.id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -256,10 +257,29 @@ const Edit = ({ placeholder }) => {
         }
       });
   }
+    // fetch sizes
+    const fetchSizes = async () => {
+    const res = await fetch(`${apiUrl}/sizes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${adminToken()}`
+      }
+    }).then(res => res.json())
+      .then(result => {
+        if (result.status == 200) {
+          setSizes(result.data);
+        } else {
+          console.log("something went wrong...");
+        }
+      });
+  }
 
   useEffect(() => {
     fetchCategories();
     fetchBrands();
+    fetchSizes();
   }, [])
   return (
     <Layout>
@@ -479,6 +499,34 @@ const Edit = ({ placeholder }) => {
                         errors.is_featured && <p className='invalid-feedback'>{errors.is_featured?.message}</p>
                       }
                     </div>
+                    <div className="mb-3">
+                      <label htmlFor="" className="form-label">Sizes</label>
+                      {
+                        sizes && sizes.map(size => {
+                            return (
+                                    <div className="form-check-inline ps-2" key={`psize-${size.id}`}>
+                                        <input
+                                        {
+                                            ...register('sizes')
+                                        }
+                                        checked={sizesChecked.includes(size.id)}
+                                        onChange={ (e) => {
+                                            if(e.target.checked) {
+                                                setSizesChecked([...sizesChecked,size.id]);
+                                            } else {
+                                                setSizesChecked(sizesChecked.filter(sid => size.id != sid));
+                                            }
+                                        }}
+                                         className="form-check-input" type="checkbox" value={size.id} id={`size-${size.id}`} />
+                                        <label className="form-check-label ps-2" htmlFor={`size-${size.id}`}>
+                                            {size.name}
+                                        </label>
+                                    </div>
+                            )
+                        })
+                      }
+                      
+                    </div>
                     {/* Image gallery section */}
                     <h3 className='py-3 border-bottom mt-3'>Gallery</h3>
                     <div className="mb-3">
@@ -509,8 +557,8 @@ const Edit = ({ placeholder }) => {
                                 
                                 {
                                     productImg.is_default_img && 
-                                    <div class="default-badge">
-                                        <i class="fa fa-crown me-1"></i>Default
+                                    <div className="default-badge">
+                                        <i className="fa fa-crown me-1"></i>Default
                                     </div>
                                 }
                                 <img src={productImg.image_url} alt="" className='w-100 rounded' />
@@ -521,11 +569,11 @@ const Edit = ({ placeholder }) => {
                                   onClick={() => deleteImg(productImg.id)}
                                 >{disable ? '' : String.fromCharCode(215)}</button>
                                 <button 
-                                class="btn mt-2 set-default-btn w-100"
+                                className="btn mt-2 set-default-btn w-100"
                                 disabled={productImg.is_default_img}
                                 type='button'
                                 onClick={() => setImageAsDefault(productImg.image)}>
-                                    <i class="fas fa-star me-2"></i>
+                                    <i className="fas fa-star me-2"></i>
                                     {
                                         productImg.is_default_img == true ? 'Current Default' : 'Set as Default'
                                     }
