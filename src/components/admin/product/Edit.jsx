@@ -407,11 +407,11 @@ const Edit = ({ placeholder }) => {
                           } />
                       </div>
                       <div className="col-md-6">
-                        <label htmlFor="" className="form-label">Discounted Price</label>
+                        <label htmlFor="" className="form-label">Compare Price</label>
                         <input
                           type="number"
                           className="form-control"
-                          placeholder='Discounted Price'
+                          placeholder='Compare Price'
                           {
                           ...register('compare_price')
                           } />
