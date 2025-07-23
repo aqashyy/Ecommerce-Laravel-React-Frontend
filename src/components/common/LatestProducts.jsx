@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ProductImg from '../../assets/images/Mens/eight.jpg';
 import { apiUrl } from './http';
+import { Link } from 'react-router-dom';
 
 function LatestProducts() {
     const [products, setProducts] = useState([]);
@@ -40,7 +41,7 @@ function LatestProducts() {
                                             <img src={product.image_url} alt="" className='w-100' />
                                         </div>
                                         <div className="card-body p-0">
-                                            <a href="" className=''>{product.title}</a>
+                                            <Link to={`/product/${product.id}`} className=''>{product.title}</Link>
                                             <div className="price">
                                                 ${ product.price } &nbsp;
 
