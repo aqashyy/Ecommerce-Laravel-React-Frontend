@@ -21,6 +21,8 @@ import {default as EditBrand} from './components/admin/brand/Edit'
 import {default as ShowProducts} from './components/admin/product/Show'
 import {default as CreateProduct} from './components/admin/product/Create'
 import {default as EditProduct} from './components/admin/product/Edit'
+import Register from './components/Register'
+import {default as UserLogin} from './components/Login'
 
 function App() {
 
@@ -34,6 +36,8 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin/login" element={<Login />} />
+          <Route path="/account/register" element={<Register />} />
+          <Route path="/account/login" element={<UserLogin />} />
 
           <Route path="/admin/dashboard" element={
             <AdminRequireAuth>
