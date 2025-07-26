@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Layout from './common/Layout'
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { apiUrl, userToken } from './common/http';
 import Loader from './common/Loader';
 
@@ -91,7 +91,7 @@ function Confirmation() {
                                                 {
                                                     order.order_items && order.order_items.map((item) => {
                                                         return (
-                                                            <tr>
+                                                            <tr key={`order-items-${item.id}`}>
                                                                 <td>{item.name}</td>
                                                                 <td>{item.qty}</td>
                                                                 <td>${item.unit_price}</td>
@@ -117,7 +117,7 @@ function Confirmation() {
                                             </tfoot>
                                         </table>
                                         <div className="text-center">
-                                            <button className="btn btn-primary">View Order Details</button>
+                                            <Link to={`/account/orders/${order.id}`} className="btn btn-primary">View Order Details</Link>
                                             <button className="btn btn-outline-secondary ms-2">Continue Shopping</button>
                                         </div>
                                     </div>

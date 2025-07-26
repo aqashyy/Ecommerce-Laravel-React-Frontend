@@ -13,7 +13,31 @@ const Checkout = () => {
     const handlePaymentMethod = (e) => {
         setPaymentMethod(e.target.value);
     }
-    const { register, handleSubmit, setError, clearErrors, watch, formState: { errors }, } = useForm();
+    const { register, handleSubmit, reset, setError, clearErrors, watch, formState: { errors }, } = useForm({
+        defaultValues: async () => {
+              fetch(`${apiUrl}/get-profile`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'Authorization': `Bearer ${userToken()}`
+                }
+              }).then(res => res.json())
+                .then(result => {
+                  if (result.status == 200) {
+                    reset({
+                      name: result.data.name,
+                      email: result.data.email,
+                      address: result.data.address,
+                      state: result.data.state,
+                      city: result.data.city,
+                      zip: result.data.zip,
+                      mobile: result.data.mobile,
+                    })
+                  }
+                })
+            }
+    });
 
     const processOrder = (data) => {
         if (paymentMethod == 'cod') {

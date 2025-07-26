@@ -23,11 +23,13 @@ import {default as CreateProduct} from './components/admin/product/Create'
 import {default as EditProduct} from './components/admin/product/Edit'
 import Register from './components/Register'
 import {default as UserLogin} from './components/Login'
-import Profile from './components/Profile'
+import Profile from './components/front/Profile'
 import { RequireAuth } from './components/RequireAuth'
 import Confirmation from './components/Confirmation'
 import ShowOrders from './components/admin/orders/ShowOrders'
 import OrderDetail from './components/admin/orders/OrderDetail'
+import MyOrders from './components/front/MyOrders'
+import {default as UserOrderDetail} from './components/front/OrderDetail'
 
 function App() {
 
@@ -57,6 +59,16 @@ function App() {
           <Route path="/order/confirmation/:id" element={
             <RequireAuth>
               <Confirmation />
+            </RequireAuth>
+          } />
+          <Route path="/account/orders" element={
+            <RequireAuth>
+              <MyOrders />
+            </RequireAuth>
+          } />
+          <Route path="/account/orders/:id" element={
+            <RequireAuth>
+              <UserOrderDetail />
             </RequireAuth>
           } />
 
