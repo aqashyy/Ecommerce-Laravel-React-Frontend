@@ -4,12 +4,19 @@ import Sidebar from '../../common/Sidebar'
 import { Link, useParams } from 'react-router-dom'
 import { adminToken, apiUrl } from '../../common/http';
 import Loader from '../../common/Loader';
+import { useForm } from 'react-hook-form';
 
 function OrderDetail() {
 
     const [order, setOrder] = useState([]);
     const [loader, setLoader] = useState(false);
     const param = useParams();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset
+    } = useForm();
 
     const getOrderDetail = () => {
         setLoader(true);
@@ -25,10 +32,38 @@ function OrderDetail() {
                 if (result.status == 200) {
                     setOrder(result.data);
                     setLoader(false);
+                    reset({
+                        status: result.data.status,
+                        payment_status: result.data.payment_status
+                    })
                 } else {
                     setLoader(false);
                 }
             })
+    }
+    const updateOrder = (data) => {
+        setLoader(true);
+        fetch(`${apiUrl}/orders/${param.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${adminToken()}`
+            },
+            body: JSON.stringify(data)
+        }).then(res => res.json())
+            .then(result => {
+                if (result.status == 200) {
+                    setOrder(result.data);
+                    setLoader(false);
+                    reset({
+                        status: result.data.status,
+                        payment_status: result.data.payment_status
+                    })
+                } else {
+                    setLoader(false);
+                }
+            });
     }
     useEffect(() => {
         getOrderDetail();
@@ -99,24 +134,24 @@ function OrderDetail() {
                                                         <p>COD</p>
                                                     </div>
                                                 </div>
-                                                <div class="row pt-2">
-                                                    <h3 class="pb-2 "><strong>Items</strong></h3>
-                                                    <div class="row justify-content-end">
-                                                        <div class="col-lg-12">
+                                                <div className="row pt-2">
+                                                    <h3 className="pb-2 "><strong>Items</strong></h3>
+                                                    <div className="row justify-content-end">
+                                                        <div className="col-lg-12">
                                                             {
                                                                 order.order_items && order.order_items.map((item) => {
                                                                     return (
-                                                                        <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                                                                            <div class="d-flex">
-                                                                                <img width="70" class="me-3" src={item.product.image_url} alt="" />
-                                                                                <div class="d-flex flex-column">
-                                                                                    <div class="mb-2"><span>{item.name}</span></div>
-                                                                                    <div><button class="btn btn-size">{item.size}</button></div>
+                                                                        <div key={`items-${item.id}`} className="d-flex justify-content-between border-bottom pb-2 mb-2">
+                                                                            <div className="d-flex">
+                                                                                <img width="70" className="me-3" src={item.product.image_url} alt="" />
+                                                                                <div className="d-flex flex-column">
+                                                                                    <div className="mb-2"><span>{item.name}</span></div>
+                                                                                    <div><button className="btn btn-size">{item.size}</button></div>
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="d-flex">
+                                                                            <div className="d-flex">
                                                                                 <div>X {item.qty}</div>
-                                                                                <div class="ps-3">${item.price}</div>
+                                                                                <div className="ps-3">${item.price}</div>
                                                                             </div>
                                                                         </div>
                                                                     )
@@ -125,17 +160,17 @@ function OrderDetail() {
 
                                                         </div>
                                                     </div>
-                                                    <div class="row justify-content-end">
-                                                        <div class="col-lg-12">
-                                                            <div class="d-flex  justify-content-between border-bottom pb-2 mb-2">
+                                                    <div className="row justify-content-end">
+                                                        <div className="col-lg-12">
+                                                            <div className="d-flex  justify-content-between border-bottom pb-2 mb-2">
                                                                 <div>Subtotal</div>
                                                                 <div>${order.subtotal}</div>
                                                             </div>
-                                                            <div class="d-flex  justify-content-between border-bottom pb-2 mb-2">
+                                                            <div className="d-flex  justify-content-between border-bottom pb-2 mb-2">
                                                                 <div>Shipping</div>
                                                                 <div>${order.shipping}</div>
                                                             </div>
-                                                            <div class="d-flex  justify-content-between border-bottom pb-2 mb-2">
+                                                            <div className="d-flex  justify-content-between border-bottom pb-2 mb-2">
                                                                 <div><strong>Grand Total</strong></div>
                                                                 <div>${order.grand_total}</div>
                                                             </div>
@@ -150,7 +185,33 @@ function OrderDetail() {
                             <div className="col-md-3">
                                 <div className="card shadow">
                                     <div className="card-body p-4">
-
+                                        <div className="mb-2">
+                                            <form onSubmit={handleSubmit(updateOrder)}>
+                                                <label htmlFor="order-status" className="form-label">Status</label>
+                                                <select
+                                                    {
+                                                    ...register('status')
+                                                    }
+                                                    className='form-select' id="order-status">
+                                                    <option value="pending">Pending</option>
+                                                    <option value="shipped">Shipped</option>
+                                                    <option value="delivered">Delivered</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                </select>
+                                                <label htmlFor="payment-status" className="pt-2 form-label">Payment Status</label>
+                                                <select
+                                                    {
+                                                    ...register('payment_status')
+                                                    }
+                                                    className='form-select' id="payment-status">
+                                                    <option value="paid">Paid</option>
+                                                    <option value="unpaid">Unpaid</option>
+                                                </select>
+                                                <div className="mt-3 text-center">
+                                                    <button type='submit' className='btn btn-primary'>Update</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
