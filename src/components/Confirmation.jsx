@@ -118,7 +118,7 @@ function Confirmation() {
                                         </table>
                                         <div className="text-center">
                                             <Link to={`/account/orders/${order.id}`} className="btn btn-primary">View Order Details</Link>
-                                            <button className="btn btn-outline-secondary ms-2">Continue Shopping</button>
+                                            <Link to={'/shop'} className="btn btn-outline-secondary ms-2">Continue Shopping</Link>
                                         </div>
                                     </div>
                                 </div>

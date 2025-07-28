@@ -1,10 +1,12 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { apiUrl } from "../common/http";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({children}) => {
 
     const [cartData, setCartData] = useState(JSON.parse(localStorage.getItem('cart')) || []);
+    const [shippingCost, setShippingCost]   =   useState();
 
     const addToCart = (product, size = null) => {
         let updatedCart = [ ...cartData ];
@@ -80,7 +82,11 @@ export const CartProvider = ({children}) => {
 
     // Price calculations
         const shipping = () => {
-            return 0;
+            let shippingCharge = 0;
+            cartData.map(item => {
+                shippingCharge += item.qty * shippingCost
+            });
+            return shippingCharge;
         }
         const subTotal = () => {
             let subtotal = 0;
@@ -122,6 +128,23 @@ export const CartProvider = ({children}) => {
             });
             return qty;
         }
+
+    useEffect(() => {
+        fetch(`${apiUrl}/get-shipping-front`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+        }).then(res => res.json())
+            .then(result => {
+                if (result.status == 200) {
+                    setShippingCost(result.data.shipping_charge);
+                } else {
+                    setShippingCost(0);
+                }
+            });
+    });
 
     return (
         <CartContext.Provider value={{ addToCart, cartData, shipping, subTotal, grandTotal, updateCartItem, deleteCartItem, getCartQty}}> 
