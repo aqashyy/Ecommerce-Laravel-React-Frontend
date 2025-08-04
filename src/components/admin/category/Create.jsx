@@ -7,7 +7,7 @@ import { adminToken, apiUrl } from '../../common/http';
 import { toast } from 'react-toastify';
 
 function Create() {
-    const { register, handleSubmit, watch, formState: { errors }, } = useForm();
+    const { register, handleSubmit, setError, watch, formState: { errors }, } = useForm();
     const [disable, setDisable] = useState(false);
     const navigate = useNavigate();
 
@@ -28,6 +28,12 @@ function Create() {
             if (result.status == 200) {
                 toast.success(result.message);
                 navigate('/admin/categories');
+            } else if(result.status == 400) {
+                const FormErrors = result.errors;
+
+                Object.keys(FormErrors).forEach((field) => {
+                setError(field, { message: FormErrors[field][0] });
+                });
             } else {
                 // console.log("Something went wrong...");
                 toast.error("Something went wrong...");
