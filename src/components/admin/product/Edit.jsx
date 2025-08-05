@@ -39,22 +39,28 @@ const Edit = ({ placeholder }) => {
         }
       }).then(res => res.json())
         .then(result => {
-          setProductImages(result.data.product_images);
-          setSizesChecked(result.productSizes);
-          reset({
-            title: result.data.title,
-            category_id	: result.data.category_id,
-            brand_id	: result.data.brand_id,
-            short_description	: result.data.short_description,
-            qty	: result.data.qty,
-            description		: result.data.description,
-            price	: result.data.price,
-            sku	: result.data.sku,
-            barcode	: result.data.barcode,
-            compare_price	: result.data.compare_price,
-            is_featured : result.data.is_featured,
-            status : result.data.status,
-          })
+          if(result.status == 200)
+          {
+            setProductImages(result.data.product_images);
+            setSizesChecked(result.productSizes);
+            reset({
+              title: result.data.title,
+              category_id	: result.data.category_id,
+              brand_id	: result.data.brand_id,
+              short_description	: result.data.short_description,
+              qty	: result.data.qty,
+              description		: result.data.description,
+              price	: result.data.price,
+              sku	: result.data.sku,
+              barcode	: result.data.barcode,
+              compare_price	: result.data.compare_price,
+              is_featured : result.data.is_featured,
+              status : result.data.status,
+            })
+          } else {
+            toast.error(result.message);
+            navigate('/admin/products');
+          }
         })
     }
   });
