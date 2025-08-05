@@ -436,8 +436,8 @@ const Create = ({ placeholder }) => {
 
                         }
                       >
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
                       </select>
                       {
                         errors.is_featured && <p className='invalid-feedback'>{errors.is_featured?.message}</p>
