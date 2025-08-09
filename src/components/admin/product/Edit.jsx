@@ -43,13 +43,13 @@ const Edit = ({ placeholder }) => {
           {
             setProductImages(result.data.product_images);
             setSizesChecked(result.productSizes);
+            setContent(result.data.description);
             reset({
               title: result.data.title,
               category_id	: result.data.category_id,
               brand_id	: result.data.brand_id,
               short_description	: result.data.short_description,
               qty	: result.data.qty,
-              description		: result.data.description,
               price	: result.data.price,
               sku	: result.data.sku,
               barcode	: result.data.barcode,
