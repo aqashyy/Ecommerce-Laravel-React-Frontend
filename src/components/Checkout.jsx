@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Layout from './common/Layout'
 import { Link, useNavigate } from 'react-router-dom'
 import { CartContext } from './context/Cart'
@@ -42,8 +42,41 @@ const Checkout = () => {
     const processOrder = (data) => {
         if (paymentMethod == 'cod') {
             saveOrder(data, 'unpaid');
+        }else if( paymentMethod == 'razorpay') {
+            // create razorpay order
+            const orderData = {
+                'amount'    :   grandTotal
+            }
+            openRazorpay();
         }
     }
+
+    const openRazorpay = () => {
+        const options = {
+          key: "YOUR_KEY_ID", // from Razorpay Dashboard
+          amount: "50000", // Amount in paisa (₹500)
+          currency: "INR",
+          name: "Acme Corp",
+          description: "Test Transaction",
+          image: "https://example.com/your_logo",
+          order_id: "order_9A33XWu170gUtm", // generated from backend
+          callback_url: "https://eneqd3r9zrjok.x.pipedream.net/",
+          prefill: {
+            name: "John Doe",
+            email: "john@example.com",
+            contact: "9999999999"
+          },
+          notes: {
+            address: "Razorpay Corporate Office"
+          },
+          theme: {
+            color: "#3399cc"
+          }
+        };
+    
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
 
     const saveOrder = (formData, paymentStatus) => {
         const newFormData = {
@@ -74,6 +107,13 @@ const Checkout = () => {
                 }
             })
     }
+    useEffect(() => {
+        // Load Razorpay script dynamically
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }, []);
     return (
         <Layout>
             <div className="container py-5">
@@ -252,9 +292,9 @@ const Checkout = () => {
                             <div className='pt-2'>
                                 <input type="radio" className="form-radio"
                                     onChange={handlePaymentMethod}
-                                    checked={paymentMethod == 'stripe'}
-                                    value={'stripe'} />
-                                <label className="form-label ps-2">Stripe</label>
+                                    checked={paymentMethod == 'razorpay'}
+                                    value={'razorpay'} />
+                                <label className="form-label ps-2">Razorpay</label>
 
                                 <input type="radio" className="form-radio ms-3"
                                     onChange={handlePaymentMethod}
