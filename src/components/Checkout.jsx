@@ -44,30 +44,69 @@ const Checkout = () => {
             saveOrder(data, 'unpaid');
         }else if( paymentMethod == 'razorpay') {
             // create razorpay order
-            const orderData = {
-                'amount'    :   grandTotal
-            }
-            openRazorpay();
+            fetch(`${apiUrl}/payments/order`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'Authorization': `Bearer ${userToken()}`
+                },
+                body: JSON.stringify({amount:grandTotal()})
+              }).then(res => res.json())
+              .then(result => {
+
+                if(result.status == 200) {
+                    console.log(result);
+                    openRazorpay(result, data);
+                } else {
+                    toast.error('Unable to proccess payment!')
+                }
+                console.log(result);
+
+              }).catch(error => {
+                console.log(error);
+              });
+
+            // openRazorpay();
         }
     }
 
-    const openRazorpay = () => {
+    const openRazorpay = (orderData, formData) => {
         const options = {
-          key: "YOUR_KEY_ID", // from Razorpay Dashboard
-          amount: "50000", // Amount in paisa (₹500)
-          currency: "INR",
-          name: "Acme Corp",
-          description: "Test Transaction",
-          image: "https://example.com/your_logo",
-          order_id: "order_9A33XWu170gUtm", // generated from backend
-          callback_url: "https://eneqd3r9zrjok.x.pipedream.net/",
+          key: orderData.key, // from Razorpay Dashboard
+          amount: orderData.amount, // Amount in paisa (₹500)
+          currency: orderData.currency,
+          name: "Pure Wear",
+          description: "Order Payment",
+          order_id: orderData.order_id, // generated from backend
+          handler: function (response) {
+            // Step 3: Verify payment on backend
+            fetch(`${apiUrl}/payments/verify`, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${userToken()}`
+                },
+                body: JSON.stringify(response)
+            })
+                .then(res => res.json())
+                .then(result => {
+                if (result.success) {
+                    // Save order in DB as paid
+                    saveOrder(formData, 'paid');
+                } else {
+                    toast.error("Payment verification failed!");
+                }
+                });
+          }, 
           prefill: {
-            name: "John Doe",
-            email: "john@example.com",
-            contact: "9999999999"
+            name: formData.name,
+            email: formData.email,
+            contact: formData.mobile
           },
           notes: {
-            address: "Razorpay Corporate Office"
+            address: formData.address
           },
           theme: {
             color: "#3399cc"
